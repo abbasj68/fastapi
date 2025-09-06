@@ -1,13 +1,12 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
-from database import SessionLocal
-from models import TokenBlocklist
+from .database import SessionLocal
+from .models import TokenBlocklist
 
 def cleanup_expired_tokens():
     db=SessionLocal()
     try:
-        expiration_time = datetime.utcnow() - timedelta(days=30)
-        deleted_count = db.query(TokenBlocklist).filter(TokenBlocklist.created_at < expiration_time).delete()
+        deleted_count = db.query(TokenBlocklist).filter(TokenBlocklist.expires_at < datetime.utcnow()).delete()
         db.commit()
         if deleted_count > 0:
             print(f"[scheduler] Deleted {deleted_count} expired token.")
